@@ -1,0 +1,25 @@
+{
+  "name": "trendsintechnology_backend",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/LuanaRTonelli2024/TrendsInTechnology_Backend#readme",
+  "bugs": {
+    "url": "https://github.com/LuanaRTonelli2024/TrendsInTechnology_Backend/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LuanaRTonelli2024/TrendsInTechnology_Backend.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "src/server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "express": "^5.2.1",
+    "mongoose": "^9.3.1"
+  }
+}
