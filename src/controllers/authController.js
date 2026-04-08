@@ -159,7 +159,6 @@ const getMe = async (req, res) => {
 }
 
 
-
 const listUsers = async (req, res) => {
     try{
         if(!req.user || !req.user.id){
@@ -186,5 +185,8 @@ const listUsers = async (req, res) => {
         });
     }
 }
+
+
+
 
 module.exports = { register, login, getMe, listUsers };
