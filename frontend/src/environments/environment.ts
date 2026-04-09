@@ -1,5 +1,5 @@
 export const environment = {
-  apiUrl: 'https://tt4-2930-be.onrender.com'
+  apiUrl: 'https://github.com/LuanaRTonelli2024/TrendsInTechnology_Backend.git'
 };
 
 // apiUrl: 'http://localhost:5000'
