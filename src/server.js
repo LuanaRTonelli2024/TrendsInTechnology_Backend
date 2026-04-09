@@ -6,7 +6,7 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 const { connectDB } = require("./config/db");
 const app = require("./app");
-const { initializeSocket } = require("./socket");
+
 
 const PORT = process.env.PORT || 5000;
 
