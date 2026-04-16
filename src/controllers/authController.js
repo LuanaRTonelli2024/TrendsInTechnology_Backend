@@ -145,7 +145,8 @@ const getMe = async (req, res) => {
         return res.json({
             message: "Authenticated user fetched successfully.",
             data: {
-                user
+                //user 
+                user: serializeUser(user)
             }
         });
     }

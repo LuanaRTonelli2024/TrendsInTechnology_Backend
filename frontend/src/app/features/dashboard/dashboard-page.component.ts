@@ -44,7 +44,11 @@ export class DashboardPageComponent {
   });
 
   constructor() {
-    this.realtimeService.connect(() => this.refreshTasks());
+    this.realtimeService.connect(
+      () => this.refreshTasks(),
+      () => this.refreshTasks(),
+      () => this.refreshTasks()
+    );
     this.destroyRef.onDestroy(() => { this.realtimeService.disconnect() });
     this.loadDashboard();
   }
@@ -117,6 +121,10 @@ export class DashboardPageComponent {
         this.pageError.set(error.error?.message ?? 'Could not save the task.');
       },
     });
+
+    console.log('editingTask.userId._id:', editingTask?.userId._id);
+    console.log('currentUser.id:', currentUser.id);
+    console.log('isOwner:', isOwner);
   }
 
   editTask(task: TaskItem): void {

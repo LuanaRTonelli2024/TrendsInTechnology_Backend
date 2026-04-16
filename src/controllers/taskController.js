@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Task = require("../models/Task");
 const User = require("../models/User");
-const { emitTaskCreated } = require("../socket");
+const { emitTaskCreated, emitTaskUpdated, emitTaskDeleted } = require("../socket");
 
 const taskPopulate = [
   { path: "userId", select: "_id name email" },
@@ -115,6 +115,8 @@ const deleteTask = async (req, res) => {
 
         await task.deleteOne();
 
+        emitTaskDeleted(task);
+
         return res.status(200).json({
             message: "Task deleted successfully",
             data: { task }
@@ -128,71 +130,77 @@ const deleteTask = async (req, res) => {
 }
 
 const updateTask = async (req, res) => {
-    const { id } = req.params;
-    const { title, description, done, priority, assignedUserId } = req.body;
+      try {
+        const { id } = req.params;
+        const { title, description, done, priority, assignedUserId } = req.body;
 
-    if (!req.user || !req.user.id) {
-        return res.status(401).json({ message: "Unauthorized." });
-    }
-
-    if(!mongoose.Types.ObjectId.isValid(id)){
-        return res.status(400).json({ message: "Invalid Task Id." });
-    }
-
-    const task = await Task.findById(id);
-
-    if(!task){
-        return res.status(404).json({ message: "Task not found!" });
-    }
-
-    const isOwner = task.userId.toString() === req.user.id;
-    const isAssignedUser = task.assignedUserId && task.assignedUserId.toString() === req.user.id;
-
-    if(!isOwner && !isAssignedUser){
-        return res.status(403).json({ message: "Forbidden." });
-    }
-
-    const updatePayload = {};
-
-    if("done" in req.body){
-        updatePayload.done = done;
-    }
-
-    if(isOwner){
-        if("title" in req.body){
-            updatePayload.title = title;
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({ message: "Unauthorized." });
         }
 
-        if("description" in req.body){
-            updatePayload.description = description;
+        if(!mongoose.Types.ObjectId.isValid(id)){
+            return res.status(400).json({ message: "Invalid Task Id." });
         }
 
-        if("priority" in req.body){
-            updatePayload.priority = priority;
+        const task = await Task.findById(id);
+
+        if(!task){
+            return res.status(404).json({ message: "Task not found!" });
         }
 
-        const resolvedAssignedUserId = await resolveAssignedUserId(assignedUserId);
-        if (resolvedAssignedUserId && resolvedAssignedUserId.error) {
-            return res.status(400).json({ message: resolvedAssignedUserId.error });
+        const isOwner = task.userId.toString() === req.user.id;
+        const isAssignedUser = task.assignedUserId && task.assignedUserId.toString() === req.user.id;
+
+        if(!isOwner && !isAssignedUser){
+            return res.status(403).json({ message: "Forbidden." });
         }
 
-        if(resolvedAssignedUserId !== undefined){
-            updatePayload.assignedUserId = resolvedAssignedUserId;
+        const updatePayload = {};
+
+        if("done" in req.body){
+            updatePayload.done = done;
         }
+
+        if(isOwner){
+            if("title" in req.body){
+                updatePayload.title = title;
+            }
+
+            if("description" in req.body){
+                updatePayload.description = description;
+            }
+
+            if("priority" in req.body){
+                updatePayload.priority = priority;
+            }
+
+            const resolvedAssignedUserId = await resolveAssignedUserId(assignedUserId);
+            if (resolvedAssignedUserId && resolvedAssignedUserId.error) {
+                return res.status(400).json({ message: resolvedAssignedUserId.error });
+            }
+
+            if(resolvedAssignedUserId !== undefined){
+                updatePayload.assignedUserId = resolvedAssignedUserId;
+            }
+        }
+
+        const updatedTask = await Task.findByIdAndUpdate(id, updatePayload, {
+            new: true,
+            runValidators: true
+        }).populate(taskPopulate);
+
+        emitTaskUpdated(updatedTask);
+
+        return res.status(200).json({
+            message: "Task Updated Successfully",
+            data: {
+                task: updatedTask
+            }
+        });
+    } catch(error) {
+        console.log(error);
+        return res.status(500).json({ message: "Error while updating the task." });
     }
-
-    const updatedTask = await Task.findByIdAndUpdate(id, updatePayload, {
-        new: true,
-        runValidators: true
-    }).populate(taskPopulate);
-
-    return res.status(200).json({
-        message: "Task Updated Successfully",
-        data: {
-            task: updatedTask
-        }
-    });
-
 }
 
 module.exports = { createTask, getTasks, deleteTask, updateTask };

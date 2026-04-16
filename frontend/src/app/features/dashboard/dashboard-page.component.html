@@ -105,8 +105,8 @@
                 <button type="button" class="secondary" (click)="toggleTask(task)">
                   {{ task.done ? 'Reopen' : 'Complete' }}
                 </button>
-                <button type="button" class="ghost" (click)="editTask(task)">Edit</button>
                 @if (isOwner(task)) {
+                  <button type="button" class="ghost" (click)="editTask(task)">Edit</button>
                   <button type="button" class="danger" (click)="deleteTask(task)">Delete</button>
                 }
               </div>
